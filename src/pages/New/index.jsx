@@ -12,7 +12,6 @@ import { toast } from 'react-toastify'
 import firebase from '../../services/firebaseConnection'
 
 import { getFirestore, setDoc, getDoc, updateDoc, addDoc, collection, doc, getDocs } from 'firebase/firestore';
-import { LocalDiningRounded } from "@mui/icons-material";
 
 const db = getFirestore(firebase);
 
@@ -76,6 +75,7 @@ function New() {
 
       let index = lista.findIndex(item => item.id === snapshot.data().clienteId)
 
+      console.log('customers index' + index)
       setCustomerSelected(index)
       setIdCustomer(true)
     })
@@ -87,6 +87,8 @@ function New() {
 
   function handleChangeCustomers(e){
     setCustomerSelected(e.target.value)
+    console.log(customerSelected)
+    
   }
 
   function handleChangeAssunto(e){
