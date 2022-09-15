@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { Button, FormControl, FormControlLabel, FormLabel, Grid, InputLabel, MenuItem, Paper, Radio, RadioGroup, Select, TextField } from "@mui/material";
+import {Autocomplete, Button, FormControl, FormControlLabel, FormLabel, Grid, InputLabel, MenuItem, Paper, Radio, RadioGroup, Select, TextField } from "@mui/material";
 import { AuthContext } from '../../contexts/auth'
 
 import TitleMenu from "../../components/TitleMenu";
@@ -11,7 +11,7 @@ import { toast } from 'react-toastify'
 
 import firebase from '../../services/firebaseConnection'
 
-import { getFirestore, setDoc, getDoc, updateDoc, addDoc, collection, doc, getDocs } from 'firebase/firestore';
+import { getFirestore, getDoc, updateDoc, addDoc, collection, doc, getDocs } from 'firebase/firestore';
 
 const db = getFirestore(firebase);
 
@@ -23,12 +23,17 @@ function New() {
   const [loadCustomers, setLoadCustomers] = useState(true)
   const [customers, setCustomers] = useState([])
   const [customerSelected, setCustomerSelected] = useState(0)
+  const [cliente, setCliente] = useState('')
+  const [inputCliente, setInputCliente] = useState('')
   const [assunto, setAssunto] = useState('')
   const [status, setStatus] = useState('Aberto')
   const [complemento, setComplemento] = useState('')
   const [idCustomer, setIdCustomer] = useState(false)
 
   const { user } = useContext(AuthContext)
+
+
+  
 
   useEffect(()=>{
     function loadCustumers(){
@@ -75,7 +80,7 @@ function New() {
 
       let index = lista.findIndex(item => item.id === snapshot.data().clienteId)
 
-      console.log('customers index' + index)
+
       setCustomerSelected(index)
       setIdCustomer(true)
     })
@@ -87,7 +92,8 @@ function New() {
 
   function handleChangeCustomers(e){
     setCustomerSelected(e.target.value)
-    console.log(customerSelected)
+    console.log('customerSelected' + customerSelected)
+    console.log('customers' + customers)
     
   }
 
@@ -151,6 +157,22 @@ function New() {
       <TitleMenu title='Novo Chamado'>
       <Grid item xs={12}>
         <Paper component="form" onSubmit={handleRegister} sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+          <FormControl sx={{mb:2}}>
+            <Autocomplete
+              value={cliente}
+              onChange={(event, newValue)=>{
+                setCliente(newValue)
+              }}
+              inputValue={inputCliente}
+              onInputChange={(event, newInputValue)=>{
+                setInputCliente(newInputValue);
+              }}
+              id='lista-clientes'
+              options={customers}
+              getOptionLabel={(option) => option.nomeFantasia}
+              renderInput={(params) => <TextField {...params} label="Cliente" />}
+            />
+          </FormControl>
           <FormControl sx={{mb:2}}>
             <InputLabel id="select-client-label">Cliente</InputLabel>
             {loadCustomers ?(
