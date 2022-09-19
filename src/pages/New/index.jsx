@@ -22,7 +22,6 @@ function New() {
 
   const [loadCustomers, setLoadCustomers] = useState(true)
   const [customers, setCustomers] = useState([])
-  const [customerSelected, setCustomerSelected] = useState(0)
   const [cliente, setCliente] = useState('')
   const [inputCliente, setInputCliente] = useState('')
   const [assunto, setAssunto] = useState('')
@@ -53,12 +52,12 @@ function New() {
             setLoadCustomers(false)
             return
           }
-
+          
           setCustomers(lista)
           setLoadCustomers(false)
 
           if(id){
-            loadId(lista)
+            loadId()
           }
       })
       .catch((error)=>{
@@ -69,36 +68,22 @@ function New() {
     }
 
     loadCustumers()
-  },[])
+  },[])}
+  
 
-  function loadId(lista){
-    getDoc(doc(db,"chamados", id))
-    .then((snapshot)=>{
+  function loadId(){
+    getDoc(doc(db,"chamados", id)).then((snapshot)=>{
       setAssunto(snapshot.data().assunto)
       setStatus(snapshot.data().status)
       setComplemento(snapshot.data().complemento)
-
-      let index = lista.findIndex(item => item.id === snapshot.data().clienteId)
-
-
-      setCustomerSelected(index)
-      setIdCustomer(true)
-    })
-    .catch((error)=>{
+      let index = lista.findIndex(item => item.id === snapshot.data().clienteId).catch((error)=>{
       console.log(error)
       setIdCustomer(false)
     })
   }
+  
 
   function handleChangeCustomers(e){
-    setCustomerSelected(e.target.value)
-    console.log('customerSelected' + customerSelected)
-    console.log('customers' + customers)
-    
-  }
-
-  function handleChangeAssunto(e){
-      setAssunto(e.target.value)
   }
   
   function handleOptionChange(e){
@@ -110,8 +95,8 @@ function New() {
 
       if(idCustomer){
         updateDoc(doc(db, "chamados", id), {
-          cliente: customers[customerSelected].nomeFantasia,
-          clienteId: customers[customerSelected].id,
+          cliente: cliente.nomeFantasia,
+          clienteId: cliente.id,
           assunto: assunto,
           status: status,
           complemento: complemento,
@@ -120,8 +105,8 @@ function New() {
         .then(()=>{
           toast.success('Alterações foram salvas com sucesso')
           setComplemento('')
-          setCustomerSelected(0)
           navigate('/dashboard')
+          console.log(cliente)
         })
         .catch((error)=>{
           console.log(error)
@@ -134,8 +119,8 @@ function New() {
 
       addDoc(collection(db, "chamados"), {
         created: new Date(),
-        cliente: customers[customerSelected].nomeFantasia,
-        clienteId: customers[customerSelected].id,
+        cliente: cliente.nomeFantasia,
+        clienteId: cliente.id,
         assunto: assunto,
         status: status,
         complemento: complemento,
@@ -144,7 +129,6 @@ function New() {
        .then(()=>{
           toast.success('Chamado cadastrado com sucesso')
           setComplemento('')
-          setCustomerSelected(0)
           navigate('/dashboard')
        })
        .catch((error)=>{
@@ -153,54 +137,37 @@ function New() {
        })
   }
 
+  
   return (
       <TitleMenu title='Novo Chamado'>
       <Grid item xs={12}>
         <Paper component="form" onSubmit={handleRegister} sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
           <FormControl sx={{mb:2}}>
-            <Autocomplete
-              value={cliente}
-              onChange={(event, newValue)=>{
-                setCliente(newValue)
-              }}
-              inputValue={inputCliente}
-              onInputChange={(event, newInputValue)=>{
-                setInputCliente(newInputValue);
-              }}
-              id='lista-clientes'
-              options={customers}
-              getOptionLabel={(option) => option.nomeFantasia}
-              renderInput={(params) => <TextField {...params} label="Cliente" />}
-            />
-          </FormControl>
-          <FormControl sx={{mb:2}}>
-            <InputLabel id="select-client-label">Cliente</InputLabel>
-            {loadCustomers ?(
-            <Select
-                disabled={true}
-                labelId="select-client-label"
-                id="select-client"
-                value='Carregando Clientes...'
-                label="Cliente"
-            >
-              <MenuItem value='Carregando Clientes...'>Carregando Clientes...</MenuItem>
-            </Select>
+            {loadCustomers ? (
+               <Select
+                  disabled={true}
+                  labelId="select-client-label"
+                  id="select-client"
+                  value='Carregando Clientes...'
+                  label="Cliente"
+                >
+                  <MenuItem value='Carregando Clientes...'>Carregando Clientes...</MenuItem>
+                </Select>
             ) : (
-
-            <Select
-                required={true}
-                labelId="select-client-label"
-                id="select-client"
-                value={customerSelected}
-                label="Cliente"
-                onChange={handleChangeCustomers}
-            >
-              {customers.map((item,index)=>{
-                return(
-                  <MenuItem key={item.id} value={index}>{item.nomeFantasia}</MenuItem>
-                )
-              })}
-            </Select>
+              <Autocomplete
+                value={cliente}
+                onChange={(event, newValue)=>{
+                  setCliente(newValue)
+                }}
+                inputValue={inputCliente}
+                onInputChange={(event, newInputValue)=>{
+                  setInputCliente(newInputValue);
+                }}
+                id='lista-clientes'
+                options={customers}
+                getOptionLabel={(option) => option.nomeFantasia ?? option }
+                renderInput={(params) => <TextField {...params} label="Cliente" />}
+              />
             )}
           </FormControl>
           <FormControl sx={{mb:2}}>
